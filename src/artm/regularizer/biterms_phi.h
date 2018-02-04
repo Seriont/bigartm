@@ -1,4 +1,4 @@
-/* Copyright 2016, Additive Regularization of Topic Models.
+/* Copyright 2017, Additive Regularization of Topic Models.
 
    Author: Murat Apishev (great-mel@yandex.ru)
 
@@ -20,8 +20,7 @@
 
 */
 
-#ifndef SRC_ARTM_REGULARIZER_BITERMS_PHI_H_
-#define SRC_ARTM_REGULARIZER_BITERMS_PHI_H_
+#pragma once
 
 #include <memory>
 #include <string>
@@ -51,5 +50,3 @@ class BitermsPhi : public RegularizerInterface {
 
 }  // namespace regularizer
 }  // namespace artm
-
-#endif  // SRC_ARTM_REGULARIZER_BITERMS_PHI_H_
