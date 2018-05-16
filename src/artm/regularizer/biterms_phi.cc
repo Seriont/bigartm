@@ -8,6 +8,7 @@
 #include "artm/core/protobuf_helpers.h"
 #include "artm/core/phi_matrix.h"
 #include "artm/regularizer/biterms_phi.h"
+#include "artm/core/phi_matrix_operations.h"
 
 namespace artm {
 namespace regularizer {
@@ -17,6 +18,11 @@ BitermsPhi::BitermsPhi(const BitermsPhiConfig& config) : config_(config) { }
 bool BitermsPhi::RegularizePhi(const ::artm::core::PhiMatrix& p_wt,
                                const ::artm::core::PhiMatrix& n_wt,
                                ::artm::core::PhiMatrix* result) {
+  if (!::artm::core::PhiMatrixOperations::HasEqualShape(p_wt, n_wt)) {
+    LOG(ERROR) << "BitermsPhi does not support changes in p_wt and n_wt matrix. Cancel it's launch.";
+    return false;
+  }
+
   // prepare parameters
   const int topic_size = n_wt.topic_size();
   const int token_size = n_wt.token_size();
@@ -31,6 +37,16 @@ bool BitermsPhi::RegularizePhi(const ::artm::core::PhiMatrix& p_wt,
   bool use_all_classes = false;
   if (config_.class_id_size() == 0) {
     use_all_classes = true;
+  }
+
+  bool use_all_tts = false;
+  if (config_.transaction_type_size() == 0) {
+    use_all_tts = true;
+  }
+  // ToDo(MelLain): refactor this regularizer for transaction model case
+  if (!use_all_tts) {
+    LOG(ERROR) << "BitermsPhi regularizer does not support transactions!";
+    return false;
   }
 
   if (!config_.has_dictionary_name()) {
@@ -62,7 +78,7 @@ bool BitermsPhi::RegularizePhi(const ::artm::core::PhiMatrix& p_wt,
 
   // proceed the regularization
   for (int token_id = 0; token_id < token_size; ++token_id) {
-    auto token = n_wt.token(token_id);
+    const auto& token = n_wt.token(token_id);
     if (!use_all_classes && !core::is_member(token.class_id, config_.class_id())) {
       continue;
     }
@@ -119,6 +135,10 @@ google::protobuf::RepeatedPtrField<std::string> BitermsPhi::topics_to_regularize
 
 google::protobuf::RepeatedPtrField<std::string> BitermsPhi::class_ids_to_regularize() {
   return config_.class_id();
+}
+
+google::protobuf::RepeatedPtrField<std::string> BitermsPhi::transaction_types_to_regularize() {
+  return config_.transaction_type();
 }
 
 bool BitermsPhi::Reconfigure(const RegularizerConfig& config) {
