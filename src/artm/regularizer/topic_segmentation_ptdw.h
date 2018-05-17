@@ -1,8 +1,8 @@
-/* Copyright 2016, Additive Regularization of Topic Models.
+/* Copyright 2017, Additive Regularization of Topic Models.
 
    Author: Anastasia Bayandina
 
-   Description will be updated later
+   ToDo: Description will be updated later
 */
 
 #ifndef SRC_ARTM_REGULARIZER_TOPIC_SEGMENTATION_PTDW_H_
@@ -21,11 +21,13 @@ class TopicSegmentationPtdwAgent : public RegularizePtdwAgent {
   friend class TopicSegmentationPtdw;
   TopicSegmentationPtdwConfig config_;
   ProcessBatchesArgs args_;
-  double tau_;
+  float tau_;
+  mutable std::vector< std::list<int> > dot_positions_;
 
  public:
-  TopicSegmentationPtdwAgent(const TopicSegmentationPtdwConfig& config, const ProcessBatchesArgs& args, double tau)
-    : config_(config), args_(args), tau_(tau) {}
+  TopicSegmentationPtdwAgent(const TopicSegmentationPtdwConfig& config, const ProcessBatchesArgs& args, 
+    double tau, std::vector< std::list<int> > dot_positions)
+    : config_(config), args_(args), tau_(tau), dot_positions_(dot_positions) {}
 
   virtual void Apply(int item_index, int inner_iter, ::artm::utility::LocalPhiMatrix<float>* ptdw) const;
 };

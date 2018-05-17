@@ -744,21 +744,22 @@ class TopicSegmentationPtdwRegularizer(BaseRegularizer):
     _config_message = messages.TopicSegmentationPtdwConfig
     _type = const.RegularizerType_TopicSegmentationPtdw
 
-    def __init__(self, name=None, window=None, threshold=None, background_topic_names=None, config=None):
+    def __init__(self, name=None, tau=1.0, window=1, threshold=None, background_topic_names=None,
+        merge_into_segments=False, merge_threshold=0.5, config=None):
         """
         :param str name: the identifier of regularizer, will be auto-generated if not specified
         :param int window: a number of words to the one side over which smoothing will be performed
         :param float threshold: probability threshold for a word to be a topic-changing word
-        :param background_topic_names: list of names of topics to be considered background,\
-                                will not consider background topics if not specified
-        :type background_topic_names: list of str
+        :param background_topic_names: list of names or single name of topic to be considered background,\
+                                will not consider background topics if empty or None
+        :type background_topic_names: list of str or str or None
         :param config: the low-level config of this regularizer
         :type config: protobuf object
         """
 
         BaseRegularizer.__init__(self,
                                  name=name,
-                                 tau=1.0,
+                                 tau=tau,
                                  gamma=None,
                                  config=config)
         if window is not None:
@@ -772,3 +773,8 @@ class TopicSegmentationPtdwRegularizer(BaseRegularizer):
         if background_topic_names is not None:
             for topic_name in background_topic_names:
                 self._config.background_topic_names.append(topic_name)
+
+        self._config.merge_threshold = 0.0
+        if merge_into_segments:
+            self._config.merge_into_segments=True
+            self._config.merge_threshold = merge_threshold
